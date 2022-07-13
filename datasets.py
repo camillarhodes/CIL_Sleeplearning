@@ -61,7 +61,7 @@ class MasDataset(Dataset):
     
     
     
-def get_train_val_dataloaders(split_percent=0.85, batch_size=4, transform=None, include_massachusetts=True):
+def get_train_val_dataloaders(split_percent=0.85, batch_size=4, num_workers=4, transform=None, include_massachusetts=True):
     seg_dataset = SegDataset(transform)
     
     seg_dataset_len = len(seg_dataset)
@@ -69,10 +69,12 @@ def get_train_val_dataloaders(split_percent=0.85, batch_size=4, transform=None, 
     val_size = seg_dataset_len - train_size
     
     train_dataset, val_dataset = random_split(seg_dataset, [train_size, val_size], generator=torch.Generator().manual_seed(42))
+    
+    
     if include_massachusetts:
         mas_dataset = MasDataset(transform)
         train_dataset = ConcatDataset([train_dataset, mas_dataset])
-    train_dataloader = DataLoader(train_dataset, batch_size=4)
-    val_dataloader = DataLoader(val_dataset, batch_size=batch_size)
+    train_dataloader = DataLoader(train_dataset, batch_size=4, num_workers=4)
+    val_dataloader = DataLoader(val_dataset, batch_size=batch_size, num_workers=4)
     
     return train_dataloader, val_dataloader
