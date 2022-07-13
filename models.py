@@ -41,3 +41,4 @@ baseline_model = smp.Unet(
 def get_pl_model(model_name):
     if model_name == 'baseline':
         return SegmentationModel(baseline_model)
+    raise NotImplementedError('Unsupported model')
