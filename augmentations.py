@@ -22,6 +22,8 @@ crop_flip_constrast = [
 ]
 
 def get_transforms(augmentation_type, **kwargs):
+    if augmentation_type == 'none' or augmentation_type == None:
+        return A.Compose([])
     if augmentation_type == 'c':
         return A.Compose(crop_only)
     if augmentation_type == 'cfc':
