@@ -36,7 +36,7 @@ parser.add_argument(
 parser.add_argument(
     '--epochs',
     type=int,
-    default=20,
+    default=40,
     help='Number of epochs'
 )
 parser.add_argument(
