@@ -1,3 +1,6 @@
 [submodule "pytorch-hed"]
 	path = pytorch-hed
 	url = https://github.com/sniklaus/pytorch-hed
+[submodule "pytorch_hed"]
+	path = pytorch_hed
+	url = https://github.com/sniklaus/pytorch-hed
