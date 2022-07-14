@@ -47,8 +47,8 @@ class SegDataset(Dataset):
 class MasDataset(Dataset):
     def __init__(self, transform, data_path='./Massachusetts/tiff'):
         data_dir = Path(data_path)
-        self.img_files = list(data_dir.rglob('*.tiff'))
-        self.mask_files = list(data_dir.rglob('*.tif'))
+        self.img_files = sorted(list(data_dir.rglob('*.tiff')), key=lambda x: x.stem)
+        self.mask_files = sorted(list(data_dir.rglob('*.tif')), key=lambda x: x.stem)
         self.transform = transform
         
     def __len__(self):

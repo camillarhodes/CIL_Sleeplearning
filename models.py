@@ -1,8 +1,19 @@
 import segmentation_models_pytorch as smp
 import pytorch_lightning as pl
-from torch import nn, optim, argmax
+from torch import nn, optim, argmax, concat
 from torchgeometry.losses.dice import dice_loss as dice
 from sklearn.metrics import f1_score
+from pytorch_hed.run import estimate
+
+class EdgemapFusedModel(nn.Module):
+    def __init__(self, model):
+        super().__init__()
+        self.model = model
+        
+    def forward(self, img):
+        edgemap = estimate(img)
+        fused = concat([img,edgemap],dim=1)
+        return self.model(fused)
 
     
 class SegmentationModel(pl.LightningModule):
@@ -59,15 +70,34 @@ class SegmentationModel(pl.LightningModule):
         return optim.Adam(self.model.parameters(), lr=self.lr)
         
         
-baseline_model = smp.Unet(
+unet = smp.Unet(
     encoder_name='resnet34',        # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
     encoder_weights='imagenet',     # use `imagenet` pre-trained weights for encoder initialization
     in_channels=3,                  # model input channels (1 for gray-scale images, 3 for RGB, etc.)
     classes=2,
-    # activation='softmax'
+)
+
+unet_4_channels = smp.Unet(
+    encoder_name='resnet34',        # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
+    encoder_weights='imagenet',     # use `imagenet` pre-trained weights for encoder initialization
+    in_channels=4,                  # model input channels (1 for gray-scale images, 3 for RGB, etc.)
+    classes=2,
+)
+
+edgemap_fused_unet = EdgemapFusedModel(unet_4_channels)
+
+deeplabv3plus = smp.DeepLabV3Plus(
+    encoder_name='resnet50',        # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
+    encoder_weights='imagenet',     # use `imagenet` pre-trained weights for encoder initialization
+    in_channels=3,                  # model input channels (1 for gray-scale images, 3 for RGB, etc.)
+    classes=2,
 )
 
 def get_pl_model(model_name):
-    if model_name == 'baseline':
-        return SegmentationModel(baseline_model)
+    if model_name == 'unet':
+        return SegmentationModel(unet)
+    if model_name == 'deeplabv3plus':
+        return SegmentationModel(deeplabv3plus)
+    if model_name == 'edgemap_fused_unet':
+        return SegmentationModel(edgemap_fused_unet)
     raise NotImplementedError('Unsupported model')
