@@ -10,26 +10,31 @@ class EdgemapFusedModel(nn.Module):
         super().__init__()
         self.model = model
         
-        edgemap_layers = [
-            nn.Conv2d(1, 16, kernel_size=4, padding='same'),
-            nn.ReLU(),
-            nn.Conv2d(16, 2, kernel_size=4, padding='same'),
-            nn.ReLU(),
-        ]
+        # edgemap_layers = [
+        #     nn.Conv2d(1, 16, kernel_size=4, padding='same'),
+        #     nn.ReLU(),
+        #     nn.Conv2d(16, 2, kernel_size=4, padding='same'),
+        #     nn.ReLU(),
+        # ]
         fusion_layers = [
-            nn.Conv2d(2, 16, kernel_size=4, padding='same'),
-            nn.Tanh(),
-            nn.Conv2d(16, 2, kernel_size=4, padding='same'),
+            nn.Conv2d(3, 16, kernel_size=3, padding='same'),
+            nn.LeakyReLU(0.2),
+            nn.Conv2d(16, 32, kernel_size=3, padding='same'),
+            nn.LeakyReLU(0.2),
+            nn.Conv2d(32, 32, kernel_size=3, padding='same'),
+            nn.LeakyReLU(0.2),
+            nn.Conv2d(32, 16, kernel_size=3, padding='same'),
+            nn.LeakyReLU(0.2),
+            nn.Conv2d(16, 2, kernel_size=3, padding='same'),
         ]
-        # self.fusion_layers = nn.Sequential(*fusion_layers)
-        self.edgemap_layers = nn.Sequential(*edgemap_layers)
+        self.fusion_layers = nn.Sequential(*fusion_layers)
+        # self.edgemap_layers = nn.Sequential(*edgemap_layers)
         
     def forward(self, img):
         mask = self.model(img)
         edgemap = estimate(img)
-        edgemap_features = self.edgemap_layers(edgemap)
-        # fused_features = concat([mask,edgemap_features],dim=1)
-        return  mask + edgemap_features
+        fused_features = concat([mask,edgemap],dim=1)
+        return  mask+self.fusion_layers(fused_features)
         # return self.fusion_layers(fused_features)
     
     # def get_fused_input(self, img):
