@@ -16,6 +16,10 @@ crop_flip = [
     A.HorizontalFlip(p=0.5),
 ]
 
+center_crop = [
+        A.CenterCrop(width=256, height=256)
+]
+
 resize_to_256 = [
     A.geometric.resize.Resize(256,256),
 ]
@@ -31,4 +35,6 @@ def get_transforms(augmentation_type, **kwargs):
         return A.Compose(crop_flip_constrast)
     if augmentation_type == 'r256':
         return A.Compose(resize_to_256)
+    if augmentation_type == 'center_c':
+        return A.Compose(center_crop)
     raise NotImplementedError('Unsupported augmentation type')
