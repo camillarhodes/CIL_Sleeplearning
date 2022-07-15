@@ -1,16 +1,6 @@
 import albumentations as A
-from albumentations.core.transforms_interface import ImageOnlyTransform
-import segmentation_models_pytorch as smp
 
-class PreprocessLikePretraining(ImageOnlyTransform):
-    def __init__(self, encoder_name, encoder_weights):
-        super().__init__()
-        self.fn = smp.encoders.get_preprocessing_fn(encoder_name=encoder_name, pretrained=encoder_weights)
-    
-    def apply(self, img, **params):
-        return self.fn(img)
-    
-    
+   
 crop_only = [
     A.RandomCrop(width=256, height=256),
 ]
@@ -41,9 +31,4 @@ def get_transforms(augmentation_type, **kwargs):
         return A.Compose(crop_flip_constrast)
     if augmentation_type == 'r256':
         return A.Compose(resize_to_256)
-    if augmentation_type == 'cfp':
-        encoder_name = kwargs.pop('encoder_name')
-        encoder_weights = kwargs.pop('encoder_weights')
-        p = PreprocessLikePretraining(encoder_name, encoder_weights)
-        return A.Compose(crop_flip + [p])
     raise NotImplementedError('Unsupported augmentation type')

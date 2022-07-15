@@ -10,10 +10,32 @@ class EdgemapFusedModel(nn.Module):
         super().__init__()
         self.model = model
         
+        edgemap_layers = [
+            nn.Conv2d(1, 16, kernel_size=4, padding='same'),
+            nn.ReLU(),
+            nn.Conv2d(16, 2, kernel_size=4, padding='same'),
+            nn.ReLU(),
+        ]
+        fusion_layers = [
+            nn.Conv2d(2, 16, kernel_size=4, padding='same'),
+            nn.Tanh(),
+            nn.Conv2d(16, 2, kernel_size=4, padding='same'),
+        ]
+        # self.fusion_layers = nn.Sequential(*fusion_layers)
+        self.edgemap_layers = nn.Sequential(*edgemap_layers)
+        
     def forward(self, img):
+        mask = self.model(img)
         edgemap = estimate(img)
-        fused = concat([img,edgemap],dim=1)
-        return self.model(fused)
+        edgemap_features = self.edgemap_layers(edgemap)
+        # fused_features = concat([mask,edgemap_features],dim=1)
+        return  mask + edgemap_features
+        # return self.fusion_layers(fused_features)
+    
+    # def get_fused_input(self, img):
+    #     edgemap = estimate(img)
+    #     fused = concat([img,edgemap],dim=1)
+    #     return fused
 
     
 class SegmentationModel(pl.LightningModule):
@@ -77,14 +99,15 @@ unet = smp.Unet(
     classes=2,
 )
 
-unet_4_channels = smp.Unet(
+fpn = smp.FPN(
     encoder_name='resnet34',        # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
     encoder_weights='imagenet',     # use `imagenet` pre-trained weights for encoder initialization
-    in_channels=4,                  # model input channels (1 for gray-scale images, 3 for RGB, etc.)
+    in_channels=3,                  # model input channels (1 for gray-scale images, 3 for RGB, etc.)
     classes=2,
 )
 
-edgemap_fused_unet = EdgemapFusedModel(unet_4_channels)
+
+edgemap_fused_unet = EdgemapFusedModel(unet)
 
 deeplabv3plus = smp.DeepLabV3Plus(
     encoder_name='resnet50',        # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
@@ -96,6 +119,8 @@ deeplabv3plus = smp.DeepLabV3Plus(
 def get_pl_model(model_name):
     if model_name == 'unet':
         return SegmentationModel(unet)
+    if model_name == 'fpn':
+        return SegmentationModel(fpn)
     if model_name == 'deeplabv3plus':
         return SegmentationModel(deeplabv3plus)
     if model_name == 'edgemap_fused_unet':
