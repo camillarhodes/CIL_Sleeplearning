@@ -3,7 +3,7 @@ import pytorch_lightning as pl
 from torch import nn, optim, argmax, concat
 from torchgeometry.losses.dice import dice_loss as dice
 from sklearn.metrics import f1_score
-from pytorch_hed.run import estimate
+from pytorch_hed_fork.run import estimate
 
 class EdgemapFusedModel(nn.Module):
     def __init__(self, model):
