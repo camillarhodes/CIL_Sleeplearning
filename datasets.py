@@ -7,11 +7,17 @@ import cv2
 
 
 class SegDataset(Dataset):
-    def __init__(self, transform, data_path='./data/training', split_percent=0.85, validation=False):
-        img_dir = Path(f'{data_path}/images')
-        mask_dir = Path(f'{data_path}/groundtruth')
+    def __init__(self, transform, data_path='./data/training', split_percent=0.85, validation=False, large=False):
+        if large:
+            img_dir = Path(f'{data_path}/images_800')
+            mask_dir = Path(f'{data_path}/groundtruth_800')
+        else:
+            img_dir = Path(f'{data_path}/images')
+            mask_dir = Path(f'{data_path}/groundtruth')
+            
         self.img_files = list(img_dir.glob('*.png'))
         self.mask_files = list(mask_dir.glob('*.png'))
+        # self.return_canny = return_canny
         
         total_len = len(self.img_files)
         training_len = int(split_percent * total_len)
@@ -39,16 +45,36 @@ class SegDataset(Dataset):
             mask = transformed['mask']
             
             
+        # if self.return_canny:
+        #     canny = cv2.Canny(img,300,300)
+            
         img = (img.transpose(2,0,1) / 255).astype(np.float32)
         mask = (mask[:,:,:1].transpose(2,0,1) / 255).astype(np.float32)
+        
+        # if self.return_canny:
+        #     canny = (canny[None,:,:] / 255).astype(np.float32)
+        #     return img, mask, canny
+        
         return img, mask
     
     
 class MasDataset(Dataset):
-    def __init__(self, transform, data_path='./Massachusetts/tiff'):
+    def __init__(self, transform, data_path='./data/Massachusetts/tiff'):
+        self.return_canny=return_canny
         data_dir = Path(data_path)
-        self.img_files = sorted(list(data_dir.rglob('*.tiff')), key=lambda x: x.stem)
-        self.mask_files = sorted(list(data_dir.rglob('*.tif')), key=lambda x: x.stem)
+        unfiltered_img_files = sorted(list(data_dir.rglob('*.tiff')), key=lambda x: x.stem)
+        unfiltered_mask_files = sorted(list(data_dir.rglob('*.tif')), key=lambda x: x.stem)
+        filtered_img_files=[]
+        filtered_mask_files=[]
+        
+        for (img_path,mask_path) in zip(unfiltered_img_files, unfiltered_mask_files):
+            mask = cv2.imread(str(mask_path))
+            if mask.mean() > 25:
+                filtered_img_files.append(img_path)
+                filtered_mask_files.append(mask_path)
+        
+        self.img_files = filtered_img_files
+        self.mask_files = filtered_mask_files
         self.transform = transform
         
     def __len__(self):
@@ -64,22 +90,28 @@ class MasDataset(Dataset):
             img = transformed['image']
             mask = transformed['mask']
             
+        if self.return_canny:
+            canny = cv2.Canny(img,300,300)
             
         img = (img.transpose(2,0,1) / 255).astype(np.float32)
         mask = (mask[:,:,:1].transpose(2,0,1) / 255).astype(np.float32)
+            
+        if self.return_canny:
+            canny = (canny[None,:,:] / 255).astype(np.float32)
+            return img, mask, canny
         return img, mask
     
     
     
     
-def get_train_val_dataloaders(split_percent=0.85, batch_size=4, num_workers=4, transform_train=None, transform_val=None, include_massachusetts=True):
-    train_dataset = SegDataset(transform_train, split_percent=split_percent, validation=False)
-    val_dataset = SegDataset(transform_val, split_percent=split_percent, validation=True)
+def get_train_val_dataloaders(split_percent=0.85, batch_size=4, num_workers=4, transform_train=None, transform_val=None, include_massachusetts=False, large=False):
+    train_dataset = SegDataset(transform_train, split_percent=split_percent, validation=False, large=large)
+    val_dataset = SegDataset(transform_val, split_percent=split_percent, validation=True, large=large)
     
     if include_massachusetts:
-        mas_dataset = MasDataset(transform_train)
+        mas_dataset = MasDataset(transform_train, return_canny=return_canny)
         train_dataset = ConcatDataset([train_dataset, mas_dataset])
-    train_dataloader = DataLoader(train_dataset, batch_size=batch_size, num_workers=4)
-    val_dataloader = DataLoader(val_dataset, batch_size=batch_size, num_workers=4)
+    train_dataloader = DataLoader(train_dataset, batch_size=batch_size, num_workers=num_workers,drop_last=True)
+    val_dataloader = DataLoader(val_dataset, batch_size=batch_size, num_workers=num_workers,drop_last=True)
     
     return train_dataloader, val_dataloader
