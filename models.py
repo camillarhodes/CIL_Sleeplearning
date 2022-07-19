@@ -2,6 +2,7 @@ import pytorch_lightning as pl
 import segmentation_models_pytorch as smp
 from torch import argmax, nn, optim
 from torchgeometry.losses.dice import dice_loss as dice
+from sklearn.metrics import f1_score
 
 from drn import get_drnseg_model
 
@@ -60,6 +61,18 @@ baseline_model = smp.Unet(
     in_channels=3,
     classes=2
 )
+
+
+def create_baseline_unet_model(is_unet_plusplus=False, encoder_depth=5, encoder_name='resnet34', encoder_weights='imagenet', use_attention=False, is_greyscale=False):
+    Unet = smp.UnetPlusPlus if is_unet_plusplus else smp.Unet
+    return SegmentationModel(Unet(
+        encoder_name=encoder_name,
+        encoder_depth=encoder_depth,
+        encoder_weights=encoder_weights,
+        decoder_attention_type='scse' if use_attention else None,
+        in_channels=1 if is_greyscale else 3,
+        classes=2,
+    ))
 
 
 def get_pl_model(model_name):

@@ -1,0 +1,12 @@
+{val_score: 0.37844979763031006, max_epochs: 10, is_unet_plusplus: False, encoder_depth: 5, encoder_name: resnet34, encoder_weights: imagenet, use_attention: False }
+{val_score: 0.1891537606716156, max_epochs: 50, is_unet_plusplus: False, encoder_depth: 5, encoder_name: resnet34, encoder_weights: imagenet, use_attention: False }
+{val_score: 0.16135066747665405, max_epochs: 100, is_unet_plusplus: False, encoder_depth: 5, encoder_name: resnet34, encoder_weights: imagenet, use_attention: False }
+{val_score: 0.3316349983215332, max_epochs: 10, is_unet_plusplus: False, encoder_depth: 5, encoder_name: resnet34, encoder_weights: imagenet, use_attention: True }
+{val_score: 0.24420958757400513, max_epochs: 50, is_unet_plusplus: False, encoder_depth: 5, encoder_name: resnet34, encoder_weights: imagenet, use_attention: True }
+{val_score: 0.15230925381183624, max_epochs: 100, is_unet_plusplus: False, encoder_depth: 5, encoder_name: resnet34, encoder_weights: imagenet, use_attention: True }
+{val_score: 0.29704180359840393, max_epochs: 10, is_unet_plusplus: True, encoder_depth: 5, encoder_name: resnet34, encoder_weights: imagenet, use_attention: False }
+{val_score: 0.15225495398044586, max_epochs: 50, is_unet_plusplus: True, encoder_depth: 5, encoder_name: resnet34, encoder_weights: imagenet, use_attention: False }
+{val_score: 0.12090840190649033, max_epochs: 100, is_unet_plusplus: True, encoder_depth: 5, encoder_name: resnet34, encoder_weights: imagenet, use_attention: False }
+{val_score: 0.30943936109542847, max_epochs: 10, is_unet_plusplus: True, encoder_depth: 5, encoder_name: resnet34, encoder_weights: imagenet, use_attention: True }
+{val_score: 0.16727237403392792, max_epochs: 50, is_unet_plusplus: True, encoder_depth: 5, encoder_name: resnet34, encoder_weights: imagenet, use_attention: True }
+{val_score: 0.12473058700561523, max_epochs: 100, is_unet_plusplus: True, encoder_depth: 5, encoder_name: resnet34, encoder_weights: imagenet, use_attention: True }
