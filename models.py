@@ -8,6 +8,8 @@ import torch
 from torchgeometry.losses.dice import dice_loss as dice
 from sklearn.metrics import f1_score
 from pytorch_hed_fork.run import Network as HED_model
+import cv2
+import numpy as np
 
     
 class Discriminator(nn.Module):
@@ -141,8 +143,58 @@ class SegmentationModel(pl.LightningModule):
     def forward(self, x):
         return self.seg_model(x)
     
-    def predict_full_mask(self, x):
+            
+    def predict_full_mask_self_ensemble(self, x):
+        if torch.is_tensor(x):
+            x = np.array(x)
+            
+        assert len(x.shape) == 4 and x.shape[1] == 3
         
+        x = x[0].transpose(1,2,0)
+        
+        flipped = cv2.flip(x, 1)
+        
+        rotated_90=cv2.rotate(x,cv2.ROTATE_90_CLOCKWISE)
+        rotated_90_flipped=cv2.flip(rotated_90,1)
+        
+        rotated_180=cv2.rotate(x,cv2.ROTATE_180)
+        rotated_180_flipped=cv2.flip(rotated_180,1)
+        
+        rotated_270=cv2.rotate(rotated_180,cv2.ROTATE_90_CLOCKWISE)
+        rotated_270_flipped=cv2.flip(rotated_270,1)
+        
+        
+        
+        pred_mask = np.array(self.predict_full_mask(x.transpose(2,0,1)[None,:]))[0]
+        pred_mask_flipped = cv2.flip(self.predict_full_mask(flipped.transpose(2,0,1)[None,:])[0].cpu().numpy().transpose(1,2,0), 1)
+        
+        pred_mask_rotated_90 = cv2.rotate(self.predict_full_mask(rotated_90.transpose(2,0,1)[None,:])[0].cpu().numpy().transpose(1,2,0), cv2.ROTATE_90_COUNTERCLOCKWISE)
+        pred_mask_rotated_90_flipped = cv2.rotate(cv2.flip(self.predict_full_mask(rotated_90_flipped.transpose(2,0,1)[None,:])[0].cpu().numpy().transpose(1,2,0), 1), cv2.ROTATE_90_COUNTERCLOCKWISE)
+  
+        pred_mask_rotated_180 = cv2.rotate(self.predict_full_mask(rotated_180.transpose(2,0,1)[None,:])[0].cpu().numpy().transpose(1,2,0), cv2.ROTATE_180)
+        pred_mask_rotated_180_flipped = cv2.rotate(cv2.flip(self.predict_full_mask(rotated_180_flipped.transpose(2,0,1)[None,:])[0].cpu().numpy().transpose(1,2,0), 1), cv2.ROTATE_180)
+        
+        pred_mask_rotated_270 = cv2.rotate(cv2.rotate(self.predict_full_mask(rotated_270.transpose(2,0,1)[None,:])[0].cpu().numpy().transpose(1,2,0), cv2.ROTATE_180), cv2.ROTATE_90_COUNTERCLOCKWISE)
+        pred_mask_rotated_270_flipped = cv2.rotate(cv2.rotate(cv2.flip(self.predict_full_mask(rotated_270_flipped.transpose(2,0,1)[None,:])[0].cpu().numpy().transpose(1,2,0), cv2.ROTATE_180), 1), cv2.ROTATE_90_COUNTERCLOCKWISE)
+    
+    
+        concatenated = np.concatenate([
+            pred_mask,
+            pred_mask_flipped[None,:],
+            pred_mask_rotated_90[None,:],
+            pred_mask_rotated_90_flipped[None,:],
+            pred_mask_rotated_180[None,:],
+            pred_mask_rotated_180_flipped[None,:],
+            pred_mask_rotated_270[None,:],
+            pred_mask_rotated_270_flipped[None,:],
+        ], axis=0)
+        
+        # final = np.median(concatenated, axis=0, keepdims=True)
+        final = np.mean(concatenated, axis=0, keepdims=True)
+        return torch.Tensor(final)[None,:]
+        
+    def predict_full_mask(self, x):
+            
         if not torch.is_tensor(x):
             x = torch.Tensor(x, device=self.device)
             
@@ -178,6 +230,11 @@ class SegmentationModel(pl.LightningModule):
         pred_mask[:,:,second_crop_start_idx:crop_size,crop_size:] = 0.5*(pred_mask_3[:,:,second_crop_start_idx:crop_size,crop_overlap:crop_size] + pred_mask_4[:,:,:crop_overlap,crop_overlap:crop_size])
         
         pred_mask[:,:,second_crop_start_idx:crop_size,second_crop_start_idx:crop_size] = 0.25*(pred_mask_1[:,:,second_crop_start_idx:crop_size,second_crop_start_idx:crop_size]+pred_mask_2[:,:,:crop_overlap,second_crop_start_idx:crop_size]+pred_mask_3[:,:,second_crop_start_idx:crop_size,:crop_overlap]+pred_mask_4[:,:,:crop_overlap,:crop_overlap])
+        
+        if img_size == 800:
+            pred_mask_np = pred_mask.cpu().numpy()[0]
+            pred_mask_np_resized = cv2.resize(255*pred_mask_np.transpose(1,2,0), (400,400), interpolation=cv2.INTER_AREA)
+            pred_mask = torch.Tensor(pred_mask_np_resized / 255, device=x.device)[None,None,:,:]
         
         return pred_mask
     
