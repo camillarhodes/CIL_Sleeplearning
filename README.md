@@ -22,6 +22,14 @@ Command to activate the environment:
 $ conda activate RoadSegSR
 ```
 
+Once you activated the environment, you can run the following command to add this environment as a notebook kernel:
+
+```console
+$ python -m ipykernel install --user --name=RoadSegSR
+```
+
+Now when using the provided notebooks, you can activate the kernel via: Kernel -> Change Kernel -> RoadSegSR in the dropdown menu.
+
 For installing the dependecies with pip, use the following command instead (do this from the main project directory, as it contains the requirements.txt file)
 
 Unix/MacOS:
