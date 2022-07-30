@@ -6,7 +6,7 @@ Our model for semantic road segmentation which takes advantage of super-resoluti
 
 ## Brief description
 
-Our inputs are 400 x 400 road images. We first train VDSR, a deep learning based super-resolution method, to obtain 800 x 800 inputs from our original inputs (corresponding training masks are resized using the opencv "resize" function). We then train four networks: {Unet-SCSE, DeepLabv3+} x {256, 512}, by training both architectures on 256 x 256 crops of 400 x 400 inputs, and on 512 x 512 crops of 800 x 800 inputs. The final prediction mask is obtained by averaging the predictions of the four networks.
+Our inputs are 400 x 400 road images. We first train VDSR, a deep learning based super-resolution method, to obtain 800 x 800 inputs from our original inputs (corresponding training masks are resized using the opencv "resize" function). We then train four networks: {Unet, DeepLabv3+} x {256, 512}, by training both architectures on 256 x 256 crops of 400 x 400 inputs, and on 512 x 512 crops of 800 x 800 inputs. The final prediction mask is obtained by averaging the predictions of the four networks.
 
 ## Setting up dependencies
 
