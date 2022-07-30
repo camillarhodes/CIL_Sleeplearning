@@ -10,7 +10,7 @@ Our inputs are 400 x 400 road images. We first train VDSR, a deep learning based
 
 ## Setting up dependencies
 
-Command for setting up anaconda environment (do this from the main project directory, as it contains the environment.yml file):
+Command for setting up **anaconda** environment (do this from the main project directory, as it contains the environment.yml file):
 
 ```console
 $ conda env create -n RoadSegSR --file environment.yml
@@ -30,9 +30,21 @@ $ python -m ipykernel install --user --name=RoadSegSR
 
 Now when using the provided notebooks, you can activate the kernel via: Kernel -> Change Kernel -> RoadSegSR in the dropdown menu.
 
-For installing the dependecies with pip, use the following command instead (do this from the main project directory, as it contains the requirements.txt file)
+If you perfer using **pip** virtual environments, use the following commands to set up the environment (do this from the main project directory, as it contains the requirements.txt file):
 
 Unix/MacOS:
+
+```console
+$ python3 -m venv env
+```
+
+```console
+$ source env/bin/activate
+```
+
+```console
+$ pip install torch==1.12.0
+```
 
 ```console
 $ python3 -m pip install -r requirements.txt
@@ -41,8 +53,28 @@ $ python3 -m pip install -r requirements.txt
 Windows:
 
 ```console
+$ py -m venv env
+```
+
+```console
+$ .\env\Scripts\activate
+```
+
+```console
+$ pip install torch==1.12.0
+```
+
+```console
 $ py -m pip install -r requirements.txt
 ```
+
+Afterwards, on both platforms you can run:
+
+```console
+$ python -m ipykernel install --user --name=RoadSegSR
+```
+
+And as before, this kernel will now be available in the jupyter notebooks you use.
 
 ## Interacting with code & reproducing results
 
