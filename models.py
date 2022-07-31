@@ -53,9 +53,9 @@ class Discriminator(nn.Module):
 
 
 class SegmentationModel(pl.LightningModule):
-    def __init__(self, seg_model, lr=1e-4, discriminate=False):
+    def __init__(self, seg_model, pretrained_weights="imagenet", lr=1e-4, discriminate=False):
         super().__init__()
-        self.seg_model=get_seg_model(seg_model)
+        self.seg_model=get_seg_model(seg_model, pretrained_weights)
         self.lr = lr
         self.discriminate = discriminate
         if self.discriminate:
@@ -142,7 +142,7 @@ class SegmentationModel(pl.LightningModule):
 
     def forward(self, x):
         return self.seg_model(x)
-            
+
 
     def predict_full_mask(self, x):
 
@@ -181,12 +181,12 @@ class SegmentationModel(pl.LightningModule):
         pred_mask[:,:,second_crop_start_idx:crop_size,crop_size:] = 0.5*(pred_mask_3[:,:,second_crop_start_idx:crop_size,crop_overlap:crop_size] + pred_mask_4[:,:,:crop_overlap,crop_overlap:crop_size])
 
         pred_mask[:,:,second_crop_start_idx:crop_size,second_crop_start_idx:crop_size] = 0.25*(pred_mask_1[:,:,second_crop_start_idx:crop_size,second_crop_start_idx:crop_size]+pred_mask_2[:,:,:crop_overlap,second_crop_start_idx:crop_size]+pred_mask_3[:,:,second_crop_start_idx:crop_size,:crop_overlap]+pred_mask_4[:,:,:crop_overlap,:crop_overlap])
-        
+
         if img_size == 800:
             pred_mask_np = pred_mask.cpu().numpy()[0]
             pred_mask_np_resized = cv2.resize(255*pred_mask_np.transpose(1,2,0), (400,400), interpolation=cv2.INTER_AREA)
             pred_mask = torch.Tensor(pred_mask_np_resized / 255, device=x.device)[None,None,:,:]
-        
+
         return pred_mask
 
 
@@ -312,12 +312,12 @@ class EdgemapFusedUnet(Unet):
 
 
 
-def get_seg_model(model_name):
+def get_seg_model(model_name, encoder_weights='imagenet'):
     if model_name == 'unet':
         return smp.Unet(
             # encoder_name='resnet34',        # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
             encoder_name='vgg19',        # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
-            encoder_weights='imagenet',     # use `imagenet` pre-trained weights for encoder initialization
+            encoder_weights=encoder_weights,     # use `imagenet` pre-trained weights for encoder initialization
             in_channels=3,                  # model input channels (1 for gray-scale images, 3 for RGB, etc.)
             classes=2,
         )
@@ -325,7 +325,7 @@ def get_seg_model(model_name):
         return smp.UnetPlusPlus(
             # encoder_name='resnet34',        # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
             encoder_name='vgg19',        # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
-            encoder_weights='imagenet',     # use `imagenet` pre-trained weights for encoder initialization
+            encoder_weights=encoder_weights,     # use `imagenet` pre-trained weights for encoder initialization
             in_channels=3,                  # model input channels (1 for gray-scale images, 3 for RGB, etc.)
             classes=2,
         )
@@ -333,7 +333,7 @@ def get_seg_model(model_name):
         return smp.Unet(
             # encoder_name='resnet34',        # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
             encoder_name='vgg19',        # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
-            encoder_weights='imagenet',     # use `imagenet` pre-trained weights for encoder initialization
+            encoder_weights=encoder_weights,     # use `imagenet` pre-trained weights for encoder initialization
             in_channels=3,                  # model input channels (1 for gray-scale images, 3 for RGB, etc.)
             classes=2,
             decoder_attention_type='scse'
@@ -342,7 +342,7 @@ def get_seg_model(model_name):
         return smp.UnetPlusPlus(
             # encoder_name='resnet34',        # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
             encoder_name='vgg19',        # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
-            encoder_weights='imagenet',     # use `imagenet` pre-trained weights for encoder initialization
+            encoder_weights=encoder_weights,     # use `imagenet` pre-trained weights for encoder initialization
             in_channels=3,                  # model input channels (1 for gray-scale images, 3 for RGB, etc.)
             classes=2,
             decoder_attention_type='scse'
@@ -351,7 +351,7 @@ def get_seg_model(model_name):
         return smp.Unet(
             # encoder_name='resnet34',        # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
             encoder_name='vgg19',        # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
-            encoder_weights='imagenet',     # use `imagenet` pre-trained weights for encoder initialization
+            encoder_weights=encoder_weights,     # use `imagenet` pre-trained weights for encoder initialization
             decoder_channels = tuple(x*2 for x in (256, 128, 64, 32, 16)),
             decoder_attention_type='scse',
             in_channels=3,                  # model input channels (1 for gray-scale images, 3 for RGB, etc.)
@@ -361,7 +361,7 @@ def get_seg_model(model_name):
         return smp.Unet(
             # encoder_name='resnet34',        # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
             encoder_name='vgg19',        # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
-            encoder_weights='imagenet',     # use `imagenet` pre-trained weights for encoder initialization
+            encoder_weights=encoder_weights,     # use `imagenet` pre-trained weights for encoder initialization
             in_channels=3,                  # model input channels (1 for gray-scale images, 3 for RGB, etc.)
             classes=4,
         )
@@ -369,7 +369,7 @@ def get_seg_model(model_name):
         return smp.Unet(
             # encoder_name='resnet34',        # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
             encoder_name='vgg19',        # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
-            encoder_weights='imagenet',     # use `imagenet` pre-trained weights for encoder initialization
+            encoder_weights=encoder_weights,     # use `imagenet` pre-trained weights for encoder initialization
             in_channels=3,                  # model input channels (1 for gray-scale images, 3 for RGB, etc.)
             classes=2,
         )
@@ -378,7 +378,7 @@ def get_seg_model(model_name):
         return smp.DeepLabV3Plus(
             # encoder_name='vgg19',        # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
             encoder_name='resnet101',        # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
-            encoder_weights='imagenet',     # use `imagenet` pre-trained weights for encoder initialization
+            encoder_weights=encoder_weights,     # use `imagenet` pre-trained weights for encoder initialization
             in_channels=3,                  # model input channels (1 for gray-scale images, 3 for RGB, etc.)
             classes=2,
         )
@@ -386,7 +386,7 @@ def get_seg_model(model_name):
         return EdgemapFusedUnet(
             encoder_name='vgg19',        # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
             # encoder_name='mobilenet_v2',        # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
-            encoder_weights='imagenet',     # use `imagenet` pre-trained weights for encoder initialization
+            encoder_weights=encoder_weights,     # use `imagenet` pre-trained weights for encoder initialization
             in_channels=3,                  # model input channels (1 for gray-scale images, 3 for RGB, etc.)
             classes=2,
         )

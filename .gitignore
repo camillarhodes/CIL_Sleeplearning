@@ -1,6 +1,9 @@
 lightning_logs/
 logs/
-
+data/Massachusetts/
+*.png
+*.jpg
+*.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -131,3 +134,4 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+

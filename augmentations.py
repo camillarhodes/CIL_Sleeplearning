@@ -1,6 +1,6 @@
 import albumentations as A
 
-   
+
 crop_only = [
     A.RandomCrop(width=256, height=256),
 ]
@@ -63,9 +63,13 @@ center_crop_resize_to_512 = [
         A.CenterCrop(width=256, height=256),
         A.geometric.resize.Resize(512,512),
 ]
-    
+
 resize_to_256 = [
     A.geometric.resize.Resize(256,256),
+]
+
+resize_to_384 = [
+    A.geometric.resize.Resize(384,384),
 ]
 
 def get_transforms(augmentation_type, **kwargs):
@@ -97,4 +101,6 @@ def get_transforms(augmentation_type, **kwargs):
         return A.Compose(center_crop_resize_to_128)
     if augmentation_type == 'center_cr512':
         return A.Compose(center_crop_resize_to_512)
+    if augmentation_type == 'resize_384':
+        return A.Compose(resize_to_384)
     raise NotImplementedError('Unsupported augmentation type')
