@@ -116,7 +116,7 @@ Interacting with our code can be done through two jupyter notebooks:
 
 <!-- contains code to train the actual segmentation models. To reproduce our final model, use this code in this notebook to train the four models we use for our final ensemble with the given specifications. You can also retrive our model parameters by loading the model with the appopriately labeled code. The notebook also contains code blocks that predict and store the inference masks of the model, as well as code to visualize the models results (run this to run obtain a comparison between the GT, ensemble and individual model masks like the one found in the report). -->
 
-**plot_losses.ipynb** contains the code for generating the plots of the training Dice loss and training F1 score. The data used was manually downloaded from Tensorboard using the appropriate tfevents under `./logs/{model_name or ensemble_name}/` and renamed accordingly. For convenience, we include the downloaded files in our submission.
+**plot_losses.ipynb** contains the code for generating the plots of the training Dice loss and training F1 score. The data used was manually downloaded from Tensorboard using the appropriate tfevents under `./logs/{model_name or ensemble_name}/`, renamed accordingly, and placed in `./model_loss/data/`. For convenience, we include the downloaded files in our submission. The plots are saved in `./loss_plots/`.
 
 **models.py** provides a common wrapper that is used in **segmentation_pipeline.ipynb** for all models in order to generalize training and evaluating.
 
