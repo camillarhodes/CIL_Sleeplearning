@@ -10,11 +10,7 @@ Our inputs are 400 x 400 road images. We first train VDSR, a deep-learning-based
 
 ## Setting up dependencies
 
-We provide two ways to set up the environment using either conda or pip
-
-### Environment setup using Conda
-
-You should run these commands from the root project directory.
+The following commands require [anaconda](https://www.anaconda.com). You should run these commands from the root project directory.
 
 First, set up the conda environment:
 
