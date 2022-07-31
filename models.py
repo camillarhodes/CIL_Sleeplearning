@@ -176,7 +176,6 @@ class EdgemapFusedUnet(Unet):
         if "decoder_channels" not in kwargs:
             kwargs["decoder_channels"] = decoder_channels
 
-        # import pdb; pdb.set_trace()
         super().__init__(*args, **kwargs)
 
         # reflect the two encoders
@@ -195,9 +194,7 @@ class EdgemapFusedUnet(Unet):
         self.edgemap_encoder = get_encoder(
             kwargs["encoder_name"],
             in_channels=1,
-            # depth=kwargs['encoder_depth'],
             weights=kwargs["encoder_weights"],
-            # weights=None,
         )
         self.hed_model = HED_model().eval()
         for param in self.hed_model.parameters():
@@ -307,5 +304,5 @@ def get_seg_model(model_name, encoder_weights="imagenet"):
             classes=2,
         )
     if model_name == "aspp":
-        return ASPP(in_channels=3, out_channels=1, atrous_rates=4)
+        return ASPP(in_channels=3, out_channels=1, atrous_rates=(6, 12, 18))
     raise NotImplementedError("Unsupported model")

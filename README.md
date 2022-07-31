@@ -124,8 +124,4 @@ Interacting with our code can be done through two jupyter notebooks:
 
 **augmentations.py** provides the various types of augmentations that we used during our experiments.
 
-**unet-aspp.py**
-
-**asppaux.py**
-
-**(WIP)**
+**unet-aspp.py** and **asppaux.py** include the implementation of the Unet-ASPP model.
