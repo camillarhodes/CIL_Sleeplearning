@@ -59,5 +59,3 @@ Interacting with our code can be done through two jupyter notebooks:
 **unet-aspp.py** contains code for the U-Net-ASPP model.
 
 **asppaux.py** contains auxiliary nn.Module subclasses that are used as components of U-Net-ASPP.
-
-**(WIP)**
