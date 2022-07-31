@@ -13,4 +13,8 @@ dependencies:
   - matplotlib=3.5.2
   - ipykernel=6.9.1
   - ipywidgets=7.7.1
+  - pip
+  - pip:
+    - torchgeometry==0.1.2
+    - torch-enhance==0.1.8
 prefix: /Users/adamklebus/anaconda3/envs/CIL_Test
