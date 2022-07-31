@@ -110,5 +110,5 @@ class ASPP(nn.Module):
         res = []
         for conv in self.convs:
             res.append(conv(x))
-        res = torch.cat(res, dim=1) #MODIFIED HEREEEEE TO ADD RESIDUAL CONNECTION
+        res = torch.cat(res, dim=1)  # MODIFIED HERE TO ADD RESIDUAL CONNECTION
         return self.project(res)

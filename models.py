@@ -1,15 +1,17 @@
-import segmentation_models_pytorch as smp
-from segmentation_models_pytorch.encoders import get_encoder
-from segmentation_models_pytorch.unet.decoder import UnetDecoder
-from segmentation_models_pytorch.unet import Unet
-import pytorch_lightning as pl
-from torch import nn, optim, argmax, concat, no_grad
-import torch
-from torchgeometry.losses.dice import dice_loss as dice
-from sklearn.metrics import f1_score
-from pytorch_hed_fork.run import Network as HED_model
 import cv2
 import numpy as np
+import pytorch_lightning as pl
+import segmentation_models_pytorch as smp
+import torch
+from segmentation_models_pytorch.encoders import get_encoder
+from segmentation_models_pytorch.unet import Unet
+from segmentation_models_pytorch.unet.decoder import UnetDecoder
+from sklearn.metrics import f1_score
+from torch import argmax, concat, nn, no_grad, optim
+from torchgeometry.losses.dice import dice_loss as dice
+
+from pytorch_hed_fork.run import Network as HED_model
+from asppaux import ASPP
 
 
 class Discriminator(nn.Module):
@@ -389,5 +391,11 @@ def get_seg_model(model_name, encoder_weights='imagenet'):
             encoder_weights=encoder_weights,     # use `imagenet` pre-trained weights for encoder initialization
             in_channels=3,                  # model input channels (1 for gray-scale images, 3 for RGB, etc.)
             classes=2,
+        )
+    if model_name == "ASPP":
+        return ASPP(
+            in_channels=3,
+            out_channels=1,
+            atrous_rates=4
         )
     raise NotImplementedError('Unsupported model')
