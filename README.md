@@ -6,82 +6,126 @@ Our model for semantic road segmentation which takes advantage of super-resoluti
 
 ## Brief description
 
-Our inputs are 400 x 400 road images. We first train VDSR, a deep learning based super-resolution method, to obtain 800 x 800 inputs from our original inputs (corresponding training masks are resized using the opencv "resize" function). We then train four networks: {Unet, DeepLabv3+} x {256, 512}, by training both architectures on 256 x 256 crops of 400 x 400 inputs, and on 512 x 512 crops of 800 x 800 inputs. The final prediction mask is obtained by averaging the predictions of the four networks.
+Our inputs are 400 x 400 road images. We first train VDSR, a deep-learning-based super-resolution method, to obtain 800 x 800 inputs from our original inputs (corresponding training masks are resized using the opencv "resize" function). We then train four networks: {U-Net, DeepLabv3+} x {256, 512}, by training both architectures on 256 x 256 crops of 400 x 400 inputs, and on 512 x 512 crops of 800 x 800 inputs. The final prediction mask is obtained by averaging the predictions of the four networks.
 
 ## Setting up dependencies
 
-Command for setting up **anaconda** environment (do this from the main project directory, as it contains the environment.yml file):
+We provide two ways to set up the environment using either conda or pip
+
+### Environment setup using Conda
+
+You should run these commands from the root project directory.
+
+First, set up the conda environment:
 
 ```console
 $ conda env create -n RoadSegSR --file environment.yml
 ```
 
-Command to activate the environment:
+Then, activate the environment:
 
 ```console
 $ conda activate RoadSegSR
 ```
 
-Once you activated the environment, you can run the following command to add this environment as a notebook kernel:
+Once you have activated the environment, you can run the following command to add this environment as a notebook kernel:
 
 ```console
 $ python -m ipykernel install --user --name=RoadSegSR
 ```
 
-Now when using the provided notebooks, you can activate the kernel via: Kernel -> Change Kernel -> RoadSegSR in the dropdown menu.
+Now, when using the provided notebooks, you can activate the kernel via: Kernel -> Change Kernel -> RoadSegSR in the dropdown menu.
 
-If you perfer using **pip** virtual environments, use the following commands to set up the environment (do this from the main project directory, as it contains the requirements.txt file):
+### Environment setup using pip
 
-Unix/MacOS:
+You should run these commands from the root project directory.
+
+#### Unix/MacOS:
+
+First, create the venv virtual environment
 
 ```console
 $ python3 -m venv env
 ```
 
+Then, activate the environment
+
 ```console
 $ source env/bin/activate
 ```
 
+We manually install pytorch
+
 ```console
 $ pip install torch==1.12.0
 ```
+
+Then, we install the remaining dependencies
 
 ```console
 $ python3 -m pip install -r requirements.txt
 ```
 
-Windows:
+Afterwards, we add this environment as a notebook kernel:
+
+```console
+$ python3 -m ipykernel install --user --name=RoadSegSR
+```
+
+#### Windows:
+
+First, create the venv virtual environment
 
 ```console
 $ py -m venv env
 ```
 
+Then, activate the environment
+
 ```console
 $ .\env\Scripts\activate
 ```
+
+We manually install pytorch
 
 ```console
 $ pip install torch==1.12.0
 ```
 
+Then, we install the remaining dependencies
+
 ```console
 $ py -m pip install -r requirements.txt
 ```
 
-Afterwards, on both platforms you can run:
+Afterwards, we add this environment as a notebook kernel:
 
 ```console
-$ python -m ipykernel install --user --name=RoadSegSR
+$ py -m ipykernel install --user --name=RoadSegSR
 ```
 
-And as before, this kernel will now be available in the jupyter notebooks you use.
+The kernel will now be available in the Jupyter notebooks you use.
 
 ## Interacting with code & reproducing results
 
 Interacting with our code can be done through two jupyter notebooks:
 
-**train_vdsr.ipynb** contains code to train the VDSR model, apply it on the training images and store the results. This should be ran first, such that the enlarged training samples are obtained.
+**train_vdsr.ipynb** contains the code to train the VDSR model, apply it on the training images and store the results. The whole notebook **must** be ran before running other code as it provides the enlarged training samples for the models which are trained on VDSR-upscaled images.
 
-**train_segmentation.ipynb** contains code to train the actual segmentation models. To reproduce our final model, use this code in this notebook to train the four models we use for our final ensemble with the given specifications. You can also retrive our model parameters by loading the model with the appopriately labeled code. The notebook also contains code blocks that predict and store the inference masks of the model, as well as code to visualize the models results (run this to run obtain a comparison between the GT, ensemble and individual model masks like the one found in the report).
+**segmentation_pipeline.ipynb** contains code for training, evaluating and generating the submission files for the models presented in the paper. We provide the pipeline and configurations used to test U-Lab-MS and other models during ablation testing. Running all cells sequentially is enough to generate the Dice loss, F1 score, output masks and the Kaggle submission file, no further input is required. The models are placed in separate sections which names correspond with the model names in Table 1 of our paper. For the non-ensemble methods, we use the train_dice_loss as the training Dice loss and train_f1_score as the training F1 score from the training process. The outputted masks are placed in `./data/test/{model_name}/`, and the Kaggle submission file is placed in `./kaggle_submissions/{model_name}.csv`. For the ensemble methods, we calculate the training Dice loss and training F1 score after training and print it out while running the `perform_ensemble_pipeline` method. The outputted masks are placed in `./data/test/{ensemble_name}/`, and the Kaggle submission file is placed in `./kaggle_submissions/{ensemble_name}.csv`.
+
+<!-- contains code to train the actual segmentation models. To reproduce our final model, use this code in this notebook to train the four models we use for our final ensemble with the given specifications. You can also retrive our model parameters by loading the model with the appopriately labeled code. The notebook also contains code blocks that predict and store the inference masks of the model, as well as code to visualize the models results (run this to run obtain a comparison between the GT, ensemble and individual model masks like the one found in the report). -->
+
+**plot_losses.ipynb** contains the code for generating the plots of the training Dice loss and training F1 score. The data used was manually downloaded from Tensorboard using the appropriate tfevents under `./logs/{model_name or ensemble_name}/` and renamed accordingly. For convenience, we include the downloaded files in our submission.
+
+**models.py** provides a common wrapper that is used in **segmentation_pipeline.ipynb** for all models in order to generalize training and evaluating.
+
+**datasets.py** provides code that converts raw input datasets into PyTorch dataloaders while also including augmentations.
+
+**augmentations.py** provides the various types of augmentations that we used during our experiments.
+
+**unet-aspp.py**
+
+**asppaux.py**
 
 **(WIP)**
