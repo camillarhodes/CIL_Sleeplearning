@@ -1,6 +1,6 @@
-# Multi-Scale Ensemble for Road Semantic Segmentation using Super-Resolution
+# Multi-Scale Ensemble for Road Segmentation using Super-Resolution
 
-Our model for semantic road segmentation which takes advantage of super-resolution to obtain a multi-scale ensemble. Done as a project for the "Computational Intelligence Lab" course at ETH Zürich.
+Our model for road segmentation which takes advantage of super-resolution to obtain a multi-scale ensemble. Done as a project for the "Computational Intelligence Lab" course at ETH Zürich.
 
 [Kaggle Competition](https://www.kaggle.com/competitions/cil-road-segmentation-2022) (team: Sleeplearning)
 
