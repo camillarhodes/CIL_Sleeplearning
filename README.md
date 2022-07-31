@@ -40,6 +40,8 @@ Now, when using the provided notebooks, you can activate the kernel via: Kernel 
 
 ## Interacting with code & reproducing results
 
+Before running any code, you should extract the files from Kaggle in the folder `./data/`. The `./data/` folder now should have the folders `test` and `training`, and the files `submission_to_mask.py` and `mask_to_submission.py`.
+
 Interacting with our code can be done through two jupyter notebooks:
 
 **train_vdsr.ipynb** contains the code to train the VDSR model, apply it on the training images and store the results. The whole notebook **must** be run before running other code as it creates the upscaled dataset for the models which are trained on VDSR-upscaled images.
