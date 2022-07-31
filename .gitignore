@@ -4,6 +4,8 @@ data/Massachusetts/
 *.png
 *.jpg
 *.csv
+!*_dice_loss.csv
+!*_f1_score.csv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
