@@ -10,6 +10,12 @@ Our inputs are 400 x 400 road images. We first train VDSR, a deep-learning-based
 
 ## Setting up dependencies
 
+After cloning the repository, you should pull the necessary git submodules using the command
+
+```console
+$ git submodule update --init --recursive
+```
+
 The following commands require [anaconda](https://www.anaconda.com). You should run these commands from the root project directory.
 
 First, set up the conda environment:
