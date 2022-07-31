@@ -72,7 +72,7 @@ class SegmentationModel(pl.LightningModule):
     def predict_full_mask(self, x):
         """Generates the full mask.
 
-        Because the models are trained on cropped images, we generate the full mask by combining multiple crops.
+        Because the models are trained on cropped images and output cropped masks, we generate the full mask by combining multiple crops.
         """
         if not torch.is_tensor(x):
             x = torch.Tensor(x, device=self.device)
