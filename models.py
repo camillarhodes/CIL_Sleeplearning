@@ -10,7 +10,7 @@ from sklearn.metrics import f1_score
 from torch import argmax, concat, nn, no_grad, optim
 from torchgeometry.losses.dice import dice_loss as dice
 
-from asppaux import ASPP
+from unet_aspp import UnetASPP
 from pytorch_hed_fork.run import Network as HED_model
 
 
@@ -21,7 +21,7 @@ class SegmentationModel(pl.LightningModule):
         seg_model : str
             The name of the model. Valid values are "unet", "unet++",
             "unet_scse", "unet++_scse", "unet_big", "hed_unet", "deeplabv3plus",
-            "edgemap_fused_unet", "aspp".
+            "edgemap_fused_unet", "unet_aspp".
         pretrained_weights : str, optional
             The name of the pretrained weights set to use.
         lr : float
@@ -55,14 +55,13 @@ class SegmentationModel(pl.LightningModule):
 
         pred_mask = self.seg_model(img)
 
-        if optimizer_idx == 0:
-            dice_loss = dice(pred_mask, labels)
-            loss = dice_loss
-            self.log("val_dice_loss", dice_loss, prog_bar=True)
-            val_f1_score = f1_score(
-                pred_mask.argmax(dim=1).reshape(-1).cpu(), labels.reshape(-1).cpu()
-            )
-            self.log("val_f1_score", val_f1_score, prog_bar=True)
+        dice_loss = dice(pred_mask, labels)
+        loss = dice_loss
+        self.log("val_dice_loss", dice_loss, prog_bar=True)
+        val_f1_score = f1_score(
+            pred_mask.argmax(dim=1).reshape(-1).cpu(), labels.reshape(-1).cpu()
+        )
+        self.log("val_f1_score", val_f1_score, prog_bar=True)
 
         return loss
 
@@ -231,7 +230,7 @@ def get_seg_model(model_name, encoder_weights="imagenet"):
         model_name : str
             The name of the model. Valid values are "unet", "unet++",
             "unet_scse", "unet++_scse", "unet_big", "hed_unet", "deeplabv3plus",
-            "edgemap_fused_unet", "aspp".
+            "edgemap_fused_unet", "unet_aspp".
         encoder_weights : str, optional
             The name of the pretrained weights set to use.
     """
@@ -298,11 +297,15 @@ def get_seg_model(model_name, encoder_weights="imagenet"):
     if model_name == "edgemap_fused_unet":
         return EdgemapFusedUnet(
             encoder_name="vgg19",  # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
-            # encoder_name='mobilenet_v2',        # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
             encoder_weights=encoder_weights,  # use `imagenet` pre-trained weights for encoder initialization
             in_channels=3,  # model input channels (1 for gray-scale images, 3 for RGB, etc.)
             classes=2,
         )
-    if model_name == "aspp":
-        return ASPP(in_channels=3, out_channels=1, atrous_rates=(6, 12, 18))
+    if model_name == "unet_aspp":
+        return UnetASPP(
+            encoder_name="resnet34",  # choose encoder, e.g. mobilenet_v2 or efficientnet-b7
+            encoder_weights="imagenet",  # use imagenet pre-trained weights for encoder initialization
+            in_channels=3,  # model input channels (1 for gray-scale images, 3 for RGB, etc.)
+            classes=2,
+        )
     raise NotImplementedError("Unsupported model")
