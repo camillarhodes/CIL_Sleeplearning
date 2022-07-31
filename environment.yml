@@ -1,0 +1,16 @@
+name: CIL_Test
+channels:
+  - conda-forge
+  - defaults
+  - rusty1s
+dependencies:
+  - python=3.9
+  - numpy=1.23.1
+  - pytorch-lightning=1.6.5
+  - segmentation-models-pytorch=0.2.1
+  - pytorch-geometric=2.0.4
+  - albumentations=1.2.1
+  - matplotlib=3.5.2
+  - ipykernel=6.9.1
+  - ipywidgets=7.7.1
+prefix: /Users/adamklebus/anaconda3/envs/CIL_Test
